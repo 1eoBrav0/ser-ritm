@@ -89,7 +89,7 @@ function empty(title, description, kind = 'task') {
     <div class="empty-state">
         <strong>${esc(title)}</strong>
       <p>${esc(description)}</p>
-      <button class="button secondary" data-new="${kind}">${action}</button>
+      <button class="empty-action" data-new="${kind}">${icon('plus')}${action}</button>
     </div>`;
 }
 
@@ -242,7 +242,6 @@ function renderToday() {
   const timed = entries.filter(e => !e.done && e.starts_at);
   const untimed = entries.filter(e => !e.done && !e.starts_at);
   const stats = Planner.summarize(state.entries, state.selected);
-  const date = parseDay(state.selected);
   const sections = [
     timed.length ? `<div class="agenda-group"><h3>По времени <span>${timed.length}</span></h3>${timed.map(entryRow).join('')}</div>` : '',
     untimed.length ? `<div class="agenda-group"><h3>Без времени <span>${untimed.length}</span></h3>${untimed.map(entryRow).join('')}</div>` : '',
@@ -252,12 +251,12 @@ function renderToday() {
     <section class="agenda-column">
       <div class="day-toolbar"><div class="week-controls"><button class="icon-button" data-week="-1" aria-label="Предыдущая неделя">${icon('left')}</button><button class="button quiet" id="go-today">Сегодня</button><button class="icon-button" data-week="1" aria-label="Следующая неделя">${icon('right')}</button></div><label class="jump-date">Выбрать дату<input type="date" id="jump-date" value="${state.selected}" aria-label="Перейти к дате"></label></div>
       ${weekStrip()}
-      <div class="day-summary" aria-label="Итоги выбранного дня"><span><b>${entries.length-done.length}</b> в планах</span><span><b>${done.length}</b> выполнено</span><span title="Всё расписание, включая выполненные дела"><b>${Planner.minutesText(stats.busy)}</b> занято</span></div>
-      <div class="section-heading"><h2>Расписание</h2><span>${entries.length} ${recordWord(entries.length)}</span></div>
-      <div class="schedule">${entries.length ? sections : empty('День пока свободен', 'Добавь первое дело — со временем или просто на этот день.')}</div>
+      ${entries.length ? `<div class="day-summary" aria-label="Итоги выбранного дня"><span><b>${entries.length-done.length}</b> в планах</span><span><b>${done.length}</b> выполнено</span><span title="Всё расписание, включая выполненные дела"><b>${Planner.minutesText(stats.busy)}</b> занято</span></div>` : ''}
+      <div class="section-heading"><h2>Расписание</h2>${entries.length ? `<span>${entries.length} ${recordWord(entries.length)}</span>` : ''}</div>
+      <div class="schedule">${entries.length ? sections : empty('На этот день планов нет', 'Здесь будут задачи и события. Время можно указать сразу или оставить на потом.')}</div>
       ${stats.overlap ? `<button class="overlap-link" id="show-workload">В расписании есть пересечения: ${Planner.minutesText(stats.overlap)} <span>Посмотреть →</span></button>` : ''}
     </section>
-    <aside class="right-rail">${miniCalendar()}<div class="rail-note"><h3>${esc(formatDate(date,{weekday:'long'}))}</h3><p>${stats.important ? `${stats.important} ${recordWord(stats.important)} с высокой важностью` : 'Важных дел на эту дату нет'}</p><button class="text-button" data-new="note">Записать мысль <span>↗</span></button></div></aside>
+    <aside class="right-rail">${miniCalendar()}<div class="rail-note"><button class="rail-note-action" data-new="note">${icon('plus')}<span>Новая заметка</span></button><p>Для мыслей и деталей без привязки ко времени.</p>${stats.important ? `<p class="rail-important">${stats.important} ${recordWord(stats.important)} с высокой важностью</p>` : ''}</div></aside>
   </div>
   <details class="workload-details" ${state.chartsOpen ? 'open' : ''}><summary><span class="disclosure-title">Загрузка дня и недели</span><span class="disclosure-note">${stats.busy ? Planner.minutesText(stats.busy)+' по расписанию' : 'Время, пересечения и итоги'}</span></summary>${workloadCharts()}</details>`;
 }
@@ -291,21 +290,22 @@ function syncTelegramBack() {
 function render() {
   const labels = {
     today: [state.selected === todayKey() ? 'Сегодня' : formatDate(parseDay(state.selected), {day:'numeric',month:'long'}), formatDate(parseDay(state.selected), {weekday:'long',day:'numeric',month:'long',year:'numeric'})],
-    calendar: ['Календарь', 'Расписание на месяц.'],
-    tasks: ['Задачи', 'Все дела по датам.'],
-    notes: ['Заметки', 'То, что хочется сохранить.']
+    calendar: ['Календарь', 'События и задачи по датам'],
+    tasks: ['Задачи', 'Всё, что нужно сделать'],
+    notes: ['Заметки', 'Идеи, списки и детали']
   };
   const [title, subtitle] = labels[state.view];
   $('#page-title').textContent = title;
   $('#page-subtitle').textContent = subtitle;
-  $('#breadcrumb').textContent = title;
-  $('#heading-date').textContent = state.view === 'today' ? 'Мой день' : 'Ser / Ритм';
+  $('#breadcrumb').textContent = {today:'Мой день', calendar:'Календарь', tasks:'Задачи', notes:'Заметки'}[state.view];
   $$('.nav-button').forEach(el => {
     el.classList.toggle('active', el.dataset.view === state.view);
     if (el.dataset.view === state.view) el.setAttribute('aria-current', 'page');
     else el.removeAttribute('aria-current');
   });
-  $('#nav-count').textContent = state.entries.filter(e => e.day === todayKey() && !e.done && e.kind !== 'note').length;
+  const remaining = state.entries.filter(e => e.day === todayKey() && !e.done && e.kind !== 'note').length;
+  $('#nav-count').textContent = remaining || '';
+  $('#add-entry span:not([data-icon])').textContent = state.view === 'notes' ? 'Новая заметка' : 'Новая запись';
   $('#content').innerHTML = state.view === 'today' ? renderToday() : state.view === 'calendar' ? renderCalendar() : state.view === 'tasks' ? renderTasks() : renderNotes();
   syncTelegramBack();
   // Dynamic values are assigned as properties so the CSP can forbid inline scripts.
@@ -817,8 +817,8 @@ async function boot() {
   if (tg?.initData) {
     tg.ready();
     tg.expand();
-    tg.setHeaderColor?.('#111a16');
-    tg.setBackgroundColor?.('#111a16');
+    tg.setHeaderColor?.('#131b17');
+    tg.setBackgroundColor?.('#131b17');
     if (tg.isVersionAtLeast?.('7.10')) tg.setBottomBarColor?.('#17211c');
     tg.BackButton?.onClick(() => {
       if ($('#onboarding-dialog').open) finishOnboarding();

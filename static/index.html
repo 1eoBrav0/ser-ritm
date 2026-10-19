@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#111a16">
+  <meta name="theme-color" content="#131b17">
   <meta name="description" content="Ser Ритм — календарь, задачи и заметки.">
   <title>Ser — Ритм</title>
   <link rel="icon" href="/ser-logo.png" type="image/png">
@@ -15,7 +15,7 @@
 <body>
   <div class="app-shell">
     <aside class="sidebar">
-      <a class="brand" href="/" aria-label="Ser Ритм, главная"><img class="brand-wordmark" src="/ser-logo.png" alt="Ser" width="92" height="46"><span class="product-name">Ритм<small>ежедневник</small></span></a>
+      <a class="brand" href="/" aria-label="Ser Ритм, главная"><img class="brand-wordmark" src="/ser-logo.png" alt="Ser" width="92" height="46"><span class="product-name">Ритм</span></a>
       <nav class="navigation" aria-label="Разделы">
         <button data-view="today" class="nav-button active"><span class="nav-icon" data-icon="sun"></span><span>Мой день</span><span class="nav-count" id="nav-count">0</span></button>
         <button data-view="calendar" class="nav-button"><span class="nav-icon" data-icon="calendar"></span><span>Календарь</span></button>
@@ -29,9 +29,9 @@
     </aside>
 
     <div class="workspace">
-      <header class="topbar"><div class="mobile-brand"><img class="brand-wordmark" src="/ser-logo.png" alt="Ser" width="58" height="29"><span>Ритм</span></div><span class="breadcrumb">Твоё пространство<span id="breadcrumb" hidden>Мой день</span></span><div class="topbar-right"><button class="fullscreen-button" id="fullscreen-button" type="button" aria-label="На весь экран" title="На весь экран" hidden><span data-icon="fullscreen"></span><span class="fullscreen-label">На весь экран</span></button><span id="connection-label" class="connection-status">На устройстве</span><button class="help-button" id="help-button" aria-label="Помощь и настройки">Помощь</button></div></header>
+      <header class="topbar"><div class="mobile-brand"><img class="brand-wordmark" src="/ser-logo.png" alt="Ser" width="58" height="29"><span>Ритм</span></div><span class="breadcrumb">Ежедневник <span aria-hidden="true">/</span> <span id="breadcrumb">Мой день</span></span><div class="topbar-right"><button class="fullscreen-button" id="fullscreen-button" type="button" aria-label="На весь экран" title="На весь экран" hidden><span data-icon="fullscreen"></span><span class="fullscreen-label">На весь экран</span></button><span id="connection-label" class="connection-status">На устройстве</span><button class="help-button" id="help-button" aria-label="Помощь и настройки">Помощь</button></div></header>
       <main id="main-content">
-        <div class="page-heading"><div><p class="eyebrow" id="heading-date">ЕЖЕДНЕВНИК</p><h1 id="page-title">Мой день</h1><p class="subtitle" id="page-subtitle">Задачи и события на выбранную дату.</p></div><button class="button primary" id="add-entry"><span data-icon="plus"></span><span>Добавить</span><kbd>N</kbd></button></div>
+        <div class="page-heading"><div><h1 id="page-title">Мой день</h1><p class="subtitle" id="page-subtitle">Задачи и события на выбранную дату.</p></div><button class="button primary" id="add-entry"><span data-icon="plus"></span><span>Новая запись</span><kbd>N</kbd></button></div>
 
         <div id="error-banner" class="error-banner" role="alert" hidden></div>
         <div id="content" aria-live="polite"><div class="loading">Загрузка…</div></div>
@@ -59,7 +59,7 @@
           <p class="form-hint" id="repeat-preview" aria-live="polite"></p>
         </div>
       </section>
-      <details class="extra-settings" id="extra-settings"><summary>Дополнительные настройки<span>Описание, категория, напоминание</span></summary>
+      <details class="extra-settings" id="extra-settings"><summary>Детали и напоминание<span>Описание, категория</span></summary>
         <label>Описание<textarea name="details" rows="3" maxlength="5000" placeholder="Детали, которые пригодятся"></textarea></label>
         <label>Категория<select name="category"><option value="personal">Личное</option><option value="study">Учёба</option><option value="work">Работа</option></select></label>
         <label id="reminder-label">Напомнить<select name="reminder"><option value="-1">Без напоминания</option><option value="0">В момент начала</option><option value="5">За 5 минут</option><option value="15">За 15 минут</option><option value="30">За 30 минут</option><option value="60">За час</option></select></label>
