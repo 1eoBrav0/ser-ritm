@@ -57,12 +57,12 @@ def load_settings(root, environ=None):
                 key, value = line.split('=', 1)
                 values[key.strip()] = value.strip().strip('\"\'')
     environment = os.environ if environ is None else environ
-    keys = ('PUBLIC_URL', 'BOT_TOKEN', 'WEBHOOK_SECRET', 'CRON_SECRET', 'DATA_DIR')
+    keys = ('PUBLIC_URL', 'BOT_TOKEN', 'WEBHOOK_SECRET', 'CRON_SECRET', 'DATA_DIR', 'RENDER_EXTERNAL_URL')
     values.update({key: environment[key] for key in keys if key in environment})
     data = Path(values.get('DATA_DIR') or 'data')
     if not data.is_absolute():
         data = root / data
-    return Settings(values.get('PUBLIC_URL', '').rstrip('/'), data/'telegram.sqlite3',
+    return Settings((values.get('PUBLIC_URL') or values.get('RENDER_EXTERNAL_URL', '')).rstrip('/'), data/'telegram.sqlite3',
                     values.get('BOT_TOKEN', ''), values.get('WEBHOOK_SECRET', ''), values.get('CRON_SECRET', ''))
 
 

@@ -3,7 +3,7 @@
 from pathlib import Path
 
 from ritm.hosting import create_application, load_settings
-from ritm.store import Store
+from ritm.database import open_store
 
 settings = load_settings(Path(__file__).resolve().parent)
-application = create_application(Store(settings.database_path), settings)
+application = create_application(open_store(settings), settings)

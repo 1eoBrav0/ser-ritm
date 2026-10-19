@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: ser-ritm
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements-cloud.txt
+    startCommand: gunicorn cloud_wsgi:application --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 60 --access-logfile /dev/null
+    healthCheckPath: /api/health
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: WEBHOOK_SECRET
+        generateValue: true
+      - key: CRON_SECRET
+        generateValue: true
