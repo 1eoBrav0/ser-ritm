@@ -2,7 +2,8 @@
 
 import re
 from contextlib import contextmanager
-from urllib.parse import urlsplit
+from pathlib import Path
+from urllib.parse import parse_qs, urlsplit
 
 from .store import Store
 
@@ -74,6 +75,10 @@ class PostgresStore(Store):
         except ValueError:
             raise ValueError('DATABASE_URL должен содержать адрес PostgreSQL.') from None
         self._dsn = dsn
+        certificate = parse_qs(address.query).get('sslrootcert', ['system'])[0]
+        if certificate != 'system':
+            certificate = str((Path(__file__).resolve().parent.parent / certificate).resolve())
+        self._sslrootcert = certificate
         self.schema = schema
         self._local = address.hostname in ('localhost', '127.0.0.1', '::1')
         import psycopg
@@ -96,7 +101,7 @@ class PostgresStore(Store):
         import psycopg
         from psycopg.rows import dict_row
         # verify-full validates the remote certificate and hostname, not just encryption.
-        tls = {} if self._local else {'sslmode': 'verify-full', 'sslrootcert': 'system'}
+        tls = {} if self._local else {'sslmode': 'verify-full', 'sslrootcert': self._sslrootcert}
         try:
             with psycopg.connect(self._dsn, connect_timeout=10, prepare_threshold=None,
                                  row_factory=dict_row, **tls) as connection:
