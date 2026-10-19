@@ -347,6 +347,7 @@ function setKind(kind) {
     b.classList.toggle('active', b.dataset.kind === kind);
     b.setAttribute('aria-pressed', String(b.dataset.kind === kind));
   });
+  $('#extra-title').textContent = kind === 'note' ? 'Детали заметки' : 'Детали и напоминание';
   $('#time-range-row').hidden = kind === 'note';
   $('#priority-label').hidden = kind === 'note';
   $('#reminder-label').hidden = kind === 'note';
