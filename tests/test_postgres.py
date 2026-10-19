@@ -72,7 +72,9 @@ class PostgresTests(unittest.TestCase):
         later=self.store.entries('alice','2026-10-26','2026-10-26')[0]
         self.store.save('alice',{**later,'title':'Новый график','scope':'future'},later['id'])
         self.assertEqual(self.store.get('alice',first['id'])['title'],'Работа')
-        self.assertEqual(self.store.entries('alice','2026-11-01','2026-11-30')[0]['title'],'Новый график')
+        november=[e for e in self.store.entries('alice','2026-11-01','2026-11-30') if e['day'] >= '2026-11-01']
+        self.assertEqual(len(november),5)
+        self.assertTrue(all(e['title']=='Новый график' for e in november))
 
     def test_delivery_leases_survive_connections_and_failed_transactions_roll_back(self):
         state=DeliveryState(self.store)
