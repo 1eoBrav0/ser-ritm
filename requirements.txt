@@ -1,0 +1,2 @@
+# IANA time zones on Windows (bundled Codex Python already includes this).
+tzdata

@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#111a16">
+  <meta name="description" content="Ser Ритм — календарь, задачи и заметки.">
+  <title>Ser — Ритм</title>
+  <link rel="icon" href="/ser-logo.png" type="image/png">
+  <link rel="stylesheet" href="/style.css">
+  <script src="https://telegram.org/js/telegram-web-app.js" defer></script>
+  <script src="/planner.js" defer></script>
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="/" aria-label="Ser Ритм, главная"><img class="brand-wordmark" src="/ser-logo.png" alt="Ser" width="92" height="46"><span class="product-name">Ритм<small>ежедневник</small></span></a>
+      <nav class="navigation" aria-label="Разделы">
+        <button data-view="today" class="nav-button active"><span class="nav-icon" data-icon="sun"></span><span>Мой день</span><span class="nav-count" id="nav-count">0</span></button>
+        <button data-view="calendar" class="nav-button"><span class="nav-icon" data-icon="calendar"></span><span>Календарь</span></button>
+        <button data-view="tasks" class="nav-button"><span class="nav-icon" data-icon="check"></span><span>Задачи</span></button>
+        <button data-view="notes" class="nav-button"><span class="nav-icon" data-icon="note"></span><span>Заметки</span></button>
+      </nav>
+      <div class="sidebar-bottom">
+        <button class="sidebar-help" id="tour-sidebar">Как пользоваться <span aria-hidden="true">↗</span></button>
+        <button class="profile" id="profile-button"><span class="avatar" id="avatar">С</span><span><strong id="profile-name">Твой профиль</strong><small id="profile-mode">Подключаемся…</small></span><span data-icon="info"></span></button>
+      </div>
+    </aside>
+
+    <div class="workspace">
+      <header class="topbar"><div class="mobile-brand"><img class="brand-wordmark" src="/ser-logo.png" alt="Ser" width="58" height="29"><span>Ритм</span></div><span class="breadcrumb">Твоё пространство<span id="breadcrumb" hidden>Мой день</span></span><div class="topbar-right"><button class="fullscreen-button" id="fullscreen-button" type="button" aria-label="На весь экран" title="На весь экран" hidden><span data-icon="fullscreen"></span><span class="fullscreen-label">На весь экран</span></button><span id="connection-label" class="connection-status">На устройстве</span><button class="help-button" id="help-button" aria-label="Помощь и настройки">Помощь</button></div></header>
+      <main id="main-content">
+        <div class="page-heading"><div><p class="eyebrow" id="heading-date">ЕЖЕДНЕВНИК</p><h1 id="page-title">Мой день</h1><p class="subtitle" id="page-subtitle">Задачи и события на выбранную дату.</p></div><button class="button primary" id="add-entry"><span data-icon="plus"></span><span>Добавить</span><kbd>N</kbd></button></div>
+
+        <div id="error-banner" class="error-banner" role="alert" hidden></div>
+        <div id="content" aria-live="polite"><div class="loading">Загрузка…</div></div>
+      </main>
+      <footer class="page-footer"><span id="demo-banner" hidden>Записи сохраняются на этом устройстве</span><span id="timezone-label"></span></footer>
+    </div>
+  </div>
+
+  <dialog id="entry-dialog" class="entry-dialog" aria-labelledby="dialog-title">
+    <form id="entry-form">
+      <div class="dialog-heading"><h2 id="dialog-title">Добавить запись</h2><button type="button" class="icon-button" id="close-dialog" aria-label="Закрыть"><span data-icon="close"></span></button></div>
+      <div class="kind-tabs" role="group" aria-label="Тип записи"><button type="button" data-kind="task" class="active">Задача</button><button type="button" data-kind="event">Событие</button><button type="button" data-kind="note">Заметка</button></div>
+        <label id="scope-label" hidden>Применить изменения<select name="scope"><option value="one">Только к этой записи</option><option value="future">К этой и следующим</option></select></label>
+        <p id="series-description" class="form-hint" hidden></p>
+      <label class="title-label">Название<input name="title" id="entry-title" maxlength="160" placeholder="Что нужно сделать?" required autocomplete="off"></label>
+      <div class="date-field"><label>Дата<input type="date" name="day" required></label><div class="date-shortcuts"><button type="button" data-form-day="0">Сегодня</button><button type="button" data-form-day="1">Завтра</button></div></div>
+      <div class="form-row" id="time-range-row"><label>С<input type="time" name="time" step="60" aria-label="Время начала"></label><span class="time-divider" aria-hidden="true">—</span><label>До<input type="time" name="end_time" step="60" aria-label="Время окончания"></label></div>
+      <p class="form-hint duration-summary" id="duration-summary" aria-live="polite" hidden></p>
+      <fieldset id="priority-label" class="priority-field"><legend>Важность</legend><div class="priority-options"><label><input type="radio" name="priority" value="low"><span>Низкая</span></label><label><input type="radio" name="priority" value="normal" checked><span>Обычная</span></label><label><input type="radio" name="priority" value="high"><span>Высокая</span></label></div></fieldset>
+      <section id="repeat-section" class="repeat-section">
+        <div id="repeat-settings">
+          <label>Повторять<select name="repeat"><option value="none">Не повторять</option><option value="daily">Каждый день</option><option value="workdays">По будням · пн–пт</option><option value="weekly">В выбранные дни недели</option></select></label>
+          <fieldset class="weekday-field" id="weekday-field" hidden><legend>Дни недели</legend><div class="weekday-options"><label><input type="checkbox" name="weekdays" value="0"><span>Пн</span></label><label><input type="checkbox" name="weekdays" value="1"><span>Вт</span></label><label><input type="checkbox" name="weekdays" value="2"><span>Ср</span></label><label><input type="checkbox" name="weekdays" value="3"><span>Чт</span></label><label><input type="checkbox" name="weekdays" value="4"><span>Пт</span></label><label><input type="checkbox" name="weekdays" value="5"><span>Сб</span></label><label><input type="checkbox" name="weekdays" value="6"><span>Вс</span></label></div></fieldset>
+          <label id="repeat-until-label" hidden>Повторять до <span class="optional">пусто — без окончания</span><input type="date" name="repeat_until"></label>
+          <p class="form-hint" id="repeat-preview" aria-live="polite"></p>
+        </div>
+      </section>
+      <details class="extra-settings" id="extra-settings"><summary>Дополнительные настройки<span>Описание, категория, напоминание</span></summary>
+        <label>Описание<textarea name="details" rows="3" maxlength="5000" placeholder="Детали, которые пригодятся"></textarea></label>
+        <label>Категория<select name="category"><option value="personal">Личное</option><option value="study">Учёба</option><option value="work">Работа</option></select></label>
+        <label id="reminder-label">Напомнить<select name="reminder"><option value="-1">Без напоминания</option><option value="0">В момент начала</option><option value="5">За 5 минут</option><option value="15">За 15 минут</option><option value="30">За 30 минут</option><option value="60">За час</option></select></label>
+        <p class="form-hint" id="reminder-hint"></p>
+      </details>
+      <p class="form-error" id="form-error" role="alert"></p>
+      <div class="dialog-footer"><button class="button danger" type="button" id="delete-entry" hidden>Удалить</button><button type="button" class="button secondary" id="cancel-dialog">Отмена</button><button class="button primary" id="save-entry" type="submit">Сохранить</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="info-dialog" class="info-dialog" aria-labelledby="info-title"><div class="dialog-heading"><h2 id="info-title">Ser / Ритм</h2><button class="icon-button" id="close-info" aria-label="Закрыть"><span data-icon="close"></span></button></div><p>Календарь, задачи и заметки.</p><div id="info-status" class="info-status"></div><p class="muted">Время показано в часовом поясе устройства. Повторения сохраняют часовой пояс, в котором были созданы. Клавиша N — новая запись, Esc — закрыть окно. На компьютере можно включить полный экран кнопкой вверху. В Telegram он включается автоматически, если клиент поддерживает эту функцию.</p><button class="button secondary" id="restart-tour">Как пользоваться</button><button class="button secondary" id="export-data">Скачать мои записи</button></dialog>
+  <dialog id="onboarding-dialog" class="onboarding-dialog" aria-labelledby="tour-title" aria-describedby="tour-description">
+    <div class="tour-top"><img class="brand-wordmark" src="/ser-logo.png" alt="Ser" width="72" height="36"><span>Ритм / знакомство</span><button id="skip-tour" class="text-button">Пропустить</button></div>
+    <div class="tour-progress"><span id="tour-counter">01 / 06</span><div id="tour-dots" class="tour-dots" role="group" aria-label="Шаги знакомства"></div></div>
+    <div id="tour-preview" class="tour-preview" aria-hidden="true"></div>
+    <div class="tour-copy"><h2 id="tour-title"></h2><p id="tour-description"></p><p id="tour-detail" class="tour-detail"></p></div>
+    <p id="tour-error" class="form-error" role="alert"></p>
+    <div class="tour-footer"><button id="tour-back" class="button secondary">Назад</button><button id="tour-next" class="button primary">Дальше</button></div>
+  </dialog>
+  <div id="toast" class="toast" role="status" hidden></div>
+</body>
+</html>
